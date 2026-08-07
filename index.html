@@ -14,10 +14,17 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
   <link rel="preconnect" href="https://calendly.com" />
   <link rel="preconnect" href="https://assets.calendly.com" crossorigin />
+  <!-- Wistia (Aurora) hero player hosts -->
+  <link rel="preconnect" href="https://fast.wistia.com" />
+  <link rel="preconnect" href="https://fast.wistia.net" crossorigin />
+  <link rel="preconnect" href="https://embed-ssl.wistia.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Roboto+Slab:wght@400;900&display=swap"
     rel="stylesheet"
   />
+  <!-- Wistia Aurora runtime + this media's module (both async) -->
+  <script src="https://fast.wistia.com/player.js" async></script>
+  <script src="https://fast.wistia.com/embed/tm9ereuhxc.js" async type="module"></script>
 
   <style>
     :root {
@@ -245,6 +252,23 @@
       width: 100%;
       height: 100%;
       border: 0;
+    }
+
+    /* Hero Wistia (Aurora) player fills the 16:9 frame. */
+    .video-frame wistia-player {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    /* Blurred swatch poster while the web component upgrades. */
+    .video-frame wistia-player[media-id='tm9ereuhxc']:not(:defined) {
+      background: #000 center / contain no-repeat
+        url('https://fast.wistia.com/embed/medias/tm9ereuhxc/swatch');
+      filter: blur(5px);
     }
 
     /* ============ MIRO BOARD (Client Results) ============ */
@@ -1096,7 +1120,7 @@
   <!-- begins with a bracket "[".                                       -->
   <!--                                                                 -->
   <!-- ALREADY LIVE (do not touch):                                    -->
-  <!--   Hero Loom video, Miro Client Results board, both Calendly links.-->
+  <!--   Hero Wistia video, Miro Client Results board, both Calendly links.-->
   <!-- STILL PLACEHOLDER: none — every asset is wired.                  -->
   <!-- ============================================================= -->
 
@@ -1130,14 +1154,9 @@
           (the video right below will explain everything)
         </p>
 
-        <!-- LOOM VIDEO FRAME -->
+        <!-- HERO VIDEO FRAME (Wistia Aurora, hardwired 1.5x, pitch preserved) -->
         <div class="video-frame fade-up mt-10">
-          <iframe
-            src="https://www.loom.com/embed/4528788ea5bf456fba60a2fa4de61164"
-            title="Walkthrough for Noa Bucco"
-            allowfullscreen
-            allow="autoplay; fullscreen; picture-in-picture">
-          </iframe>
+          <wistia-player media-id="tm9ereuhxc" aspect="1.7777777777777777" playback-rate="1.5"></wistia-player>
         </div>
 
         <!-- CALL TO ACTION -->
@@ -1182,72 +1201,86 @@
           <button class="info-btn" type="button" data-info="sec-cold"><span aria-hidden="true">i</span></button>
           <h3 class="row-heading">Paid Ads & Webinar Funnel</h3>
 
-          <!-- Type: Ad Creatives -->
+          <!-- Type: Ad Creatives — two Part columns (Static, Video) as slider -->
+          <!-- items. Static stacks Square, Rectangle and Carousel; Video holds  -->
+          <!-- the Direct-to-camera script. Each Part is its own 250px column      -->
+          <!-- with a top-left info button + heading; each instance is a           -->
+          <!-- block-card slot like the instances elsewhere. (Files ship under     -->
+          <!-- the engine's names: Square=Single.jpg, Rectangle=Story.jpg,          -->
+          <!-- Direct-to-camera=Video.pdf.)                                         -->
           <div class="sub-widget mt-8">
             <button class="info-btn" type="button" data-info="type-cold-ad"><span aria-hidden="true">i</span></button>
             <h4 class="sub-heading">Ad Creatives</h4>
             <div class="deliverables-slider mt-6">
 
-              <!-- Single (was "Static") -->
-              <article class="block-card">
-                <button class="info-btn" type="button" data-info="inst-cold-ad-single"><span aria-hidden="true">i</span></button>
-                <p class="sample-label">Single</p>
-                <div class="mt-6">
-                  <a class="cta-button cta-sm"
-                     href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Single.jpg"
-                     data-lb data-lb-type="image" data-lb-title="Single (static) ad creative"
-                     target="_blank" rel="noopener noreferrer">
-                    <span class="cta-main">Get A Closer View</span>
-                    <span class="cta-sub">Click here to open it up...</span>
-                  </a>
-                </div>
-              </article>
+              <!-- Static -->
+              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+                <button class="info-btn" type="button" data-info="type-cold-ad-static"><span aria-hidden="true">i</span></button>
+                <p class="sample-label" style="font-size: 1.02rem;">Static</p>
 
-              <!-- Carousel -->
-              <article class="block-card">
-                <button class="info-btn" type="button" data-info="inst-cold-ad-carousel"><span aria-hidden="true">i</span></button>
-                <p class="sample-label">Carousel</p>
-                <div class="mt-6">
-                  <a class="cta-button cta-sm"
-                     href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%201.png"
-                     data-lb data-lb-type="carousel" data-lb-title="Carousel ad creative"
-                     data-lb-srcs="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%201.png|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%202.png|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%203.jpg|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%204.jpg|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%205.jpg"
-                     target="_blank" rel="noopener noreferrer">
-                    <span class="cta-main">Get A Closer View</span>
-                    <span class="cta-sub">Click here to open it up...</span>
-                  </a>
-                </div>
-              </article>
+                <article class="block-card mt-6">
+                  <button class="info-btn" type="button" data-info="inst-cold-ad-square"><span aria-hidden="true">i</span></button>
+                  <p class="sample-label">Square</p>
+                  <div class="mt-6">
+                    <a class="cta-button cta-sm"
+                       href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Single.jpg"
+                       data-lb data-lb-type="image" data-lb-title="Square ad creative"
+                       target="_blank" rel="noopener noreferrer">
+                      <span class="cta-main">Get A Closer View</span>
+                      <span class="cta-sub">Click here to open it up...</span>
+                    </a>
+                  </div>
+                </article>
+
+                <article class="block-card mt-6">
+                  <button class="info-btn" type="button" data-info="inst-cold-ad-rectangle"><span aria-hidden="true">i</span></button>
+                  <p class="sample-label">Rectangle</p>
+                  <div class="mt-6">
+                    <a class="cta-button cta-sm"
+                       href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Story.jpg"
+                       data-lb data-lb-type="image" data-lb-title="Rectangle ad creative"
+                       target="_blank" rel="noopener noreferrer">
+                      <span class="cta-main">Get A Closer View</span>
+                      <span class="cta-sub">Click here to open it up...</span>
+                    </a>
+                  </div>
+                </article>
+
+                <article class="block-card mt-6">
+                  <button class="info-btn" type="button" data-info="inst-cold-ad-carousel"><span aria-hidden="true">i</span></button>
+                  <p class="sample-label">Carousel</p>
+                  <div class="mt-6">
+                    <a class="cta-button cta-sm"
+                       href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%201.png"
+                       data-lb data-lb-type="carousel" data-lb-title="Carousel ad creative"
+                       data-lb-srcs="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%201.png|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%202.png|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%203.jpg|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%204.jpg|Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Carousel/Slide%205.jpg"
+                       target="_blank" rel="noopener noreferrer">
+                      <span class="cta-main">Get A Closer View</span>
+                      <span class="cta-sub">Click here to open it up...</span>
+                    </a>
+                  </div>
+                </article>
+              </div>
 
               <!-- Video -->
-              <article class="block-card">
-                <button class="info-btn" type="button" data-info="inst-cold-ad-video"><span aria-hidden="true">i</span></button>
-                <p class="sample-label">Video</p>
-                <div class="mt-6">
-                  <a class="cta-button cta-sm"
-                     href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Video.pdf"
-                     data-lb data-lb-type="pdf" data-lb-title="Video ad script"
-                     target="_blank" rel="noopener noreferrer">
-                    <span class="cta-main">Get A Closer View</span>
-                    <span class="cta-sub">Click here to open it up...</span>
-                  </a>
-                </div>
-              </article>
+              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+                <button class="info-btn" type="button" data-info="type-cold-ad-video-part"><span aria-hidden="true">i</span></button>
+                <p class="sample-label" style="font-size: 1.02rem;">Video</p>
 
-              <!-- Story (MISSING in prior build; added by audit) -->
-              <article class="block-card">
-                <button class="info-btn" type="button" data-info="inst-cold-ad-story"><span aria-hidden="true">i</span></button>
-                <p class="sample-label">Story</p>
-                <div class="mt-6">
-                  <a class="cta-button cta-sm"
-                     href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Story.jpg"
-                     data-lb data-lb-type="image" data-lb-title="Story ad creative"
-                     target="_blank" rel="noopener noreferrer">
-                    <span class="cta-main">Get A Closer View</span>
-                    <span class="cta-sub">Click here to open it up...</span>
-                  </a>
-                </div>
-              </article>
+                <article class="block-card mt-6">
+                  <button class="info-btn" type="button" data-info="inst-cold-ad-dtc"><span aria-hidden="true">i</span></button>
+                  <p class="sample-label">Direct-to-camera</p>
+                  <div class="mt-6">
+                    <a class="cta-button cta-sm"
+                       href="Sample%20Deliverables/Paid%20Ads%20%26%20Webinar%20Funnel/Ad%20Creatives/Video.pdf"
+                       data-lb data-lb-type="pdf" data-lb-title="Direct-to-camera ad script"
+                       target="_blank" rel="noopener noreferrer">
+                      <span class="cta-main">Get A Closer View</span>
+                      <span class="cta-sub">Click here to open it up...</span>
+                    </a>
+                  </div>
+                </article>
+              </div>
 
             </div>
             <p class="slider-hint mt-4">Swipe to browse &rarr;</p>
@@ -1598,6 +1631,14 @@
           title: "Ad Creatives",
           body: "The assets that get shown to the cold traffic leads."
         },
+        "type-cold-ad-static": {
+          title: "Static",
+          body: "A single-frame style of asset that gets shown to the cold traffic leads."
+        },
+        "type-cold-ad-video-part": {
+          title: "Video",
+          body: "A multiple-frame style of asset that gets shown to the cold traffic leads."
+        },
         "type-cold-lp": {
           title: "Landing Pages",
           body: "The web pages that take cold traffic leads through each step."
@@ -1624,21 +1665,21 @@
         },
 
         // --- Instances: Cold › Ad Creatives ---
-        "inst-cold-ad-single": {
-          title: "Single",
-          body: "A static style that encourages the impressions to register for the free live masterclass."
+        "inst-cold-ad-square": {
+          title: "Square",
+          body: "A static asset consisting of a 1:1 individual image that gets shown to the cold traffic leads."
+        },
+        "inst-cold-ad-rectangle": {
+          title: "Rectangle",
+          body: "A static asset consisting of a 9:16 individual image that gets shown to the cold traffic leads."
         },
         "inst-cold-ad-carousel": {
           title: "Carousel",
-          body: "A swipeable style that encourages the impressions to register for the free live masterclass."
+          body: "A static asset consisting of 1:1 plural images that get shown to the cold traffic leads."
         },
-        "inst-cold-ad-video": {
-          title: "Video",
-          body: "A direct-to-camera style that encourages the impressions to register for the free live masterclass."
-        },
-        "inst-cold-ad-story": {
-          title: "Story",
-          body: "A full-screen style that encourages the impressions to register for the free live masterclass."
+        "inst-cold-ad-dtc": {
+          title: "Direct-to-camera",
+          body: "A video asset consisting of a speaker talking straight to the viewer that gets shown to the cold traffic leads."
         },
 
         // --- Instances: Cold › Landing Pages ---
@@ -2175,6 +2216,25 @@
       });
       if (closeBtn) closeBtn.addEventListener("click", closeModal);
       if (backdrop) backdrop.addEventListener("click", closeModal);
+    })();
+
+    // HERO VIDEO — hardwired 1.5x, pitch preserved (Aurora player).
+    (function () {
+      var RATE = 1.5;
+      var el = document.querySelector('wistia-player[media-id="tm9ereuhxc"]');
+      if (!el) return;
+      function apply() {
+        try { if (el.playbackRate !== RATE) el.playbackRate = RATE; } catch (e) {}
+      }
+      function wire() {
+        apply();
+        ["play", "playing", "ended", "seeked", "seek", "end"].forEach(function (ev) {
+          el.addEventListener(ev, apply);
+        });
+      }
+      if (window.customElements && customElements.whenDefined) {
+        customElements.whenDefined("wistia-player").then(wire);
+      } else { wire(); }
     })();
 
     // ===========================================================
