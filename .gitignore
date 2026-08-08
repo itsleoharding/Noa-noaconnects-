@@ -1,0 +1,4 @@
+# Large source assets kept locally, never committed (GitHub 100 MB limit)
+Video.source.mp4
+# Superseded by optimized Thumbnail.jpg
+Thumbnail.png
