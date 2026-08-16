@@ -2,3 +2,8 @@
 Video.source.mp4
 # Superseded by optimized Thumbnail.jpg
 Thumbnail.png
+
+# Root preview-staging PNGs (distributed into each PDF folder; not needed at repo root)
+/Deck.png
+/Flat.png
+/Stack.png.png
