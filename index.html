@@ -702,7 +702,7 @@
     .dp-win {
       position: relative;
       width: 100%;
-      aspect-ratio: 1 / 1;   /* placeholder until the natural ratio is set (JS) */
+      aspect-ratio: 3 / 4;   /* 4:3 vertical (portrait) window for every preview */
       border-radius: 12px;   /* rounded corners on every preview card */
       overflow: hidden;
     }
@@ -1951,7 +1951,6 @@
           if (i >= list.length) return fail(win);
           var img = new Image();
           img.decoding = "async";
-          img.loading = "lazy";
           img.className = "dp-media";
           img.onload = function () {
             if (!img.naturalWidth || !img.naturalHeight) { i++; return attempt(); }
@@ -2020,7 +2019,10 @@
         wrapDiv.parentNode.insertBefore(pre, wrapDiv); // between sample-label and CTA
 
         // Natural ratio for everything except landing pages (fixed 3:4).
-        function render() { renderImage(win, imgList, !isScroll); }
+        // Every preview window keeps the CSS 4:3-vertical (3:4) ratio — never
+        // the image's natural ratio — so all instances (incl. those under parts)
+        // are uniform. renderImage's setRatio is always false.
+        function render() { renderImage(win, imgList, false); }
         return { win: win, render: render };
       }
 
