@@ -299,45 +299,6 @@
       border: 0;
     }
 
-    .play-button {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 84px;
-      height: 84px;
-      border-radius: 9999px;
-      background-color: var(--sage);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 14px 40px -10px rgba(177, 247, 204, 0.55);
-      z-index: 2;
-    }
-
-    .play-button svg {
-      width: 34px;
-      height: 34px;
-      margin-left: 5px;
-      fill: #16241b;
-    }
-
-    .duration-badge {
-      position: absolute;
-      bottom: 14px;
-      right: 14px;
-      font-family: "JetBrains Mono", monospace;
-      font-weight: 500;
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      color: var(--ink);
-      background-color: rgba(0, 0, 0, 0.6);
-      border: 1px solid var(--hairline);
-      padding: 4px 10px;
-      border-radius: 8px;
-      z-index: 2;
-    }
-
     /* ============================================================= */
     /* SAMPLE-DELIVERABLES ZONE                                       */
     /* Each card is just the type name + a CTA; clicking the CTA opens */
@@ -834,6 +795,41 @@
       color: var(--muted);
     }
 
+    /* ============ PART COLUMNS (types that have parts) ============ */
+    /* A type WITH parts lays its parts out as columns across the type (the      */
+    /* existing horizontal slider), but each part's instances scroll VERTICALLY  */
+    /* inside a window capped to ONE instance card tall (height set from the      */
+    /* first card in JS), so the type never grows just because a part has        */
+    /* several instances. flex-start keeps the columns their natural height.     */
+    .deliverables-slider.has-parts {
+      align-items: flex-start;
+    }
+    .part-vscroll {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(177, 247, 204, 0.4) transparent;
+    }
+    .part-vscroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .part-vscroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .part-vscroll::-webkit-scrollbar-thumb {
+      background-color: rgba(177, 247, 204, 0.3);
+      border-radius: 9999px;
+    }
+    .part-vscroll > .block-card {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+    .part-vscroll > .block-card + .block-card {
+      margin-top: 20px;
+    }
+
     /* ============ CALL TO ACTION BUTTON ============ */
     /* Flat sage with dark text (the agency's colours). Two-line structure:    */
     /* bold serif main line + mono sub-line, with a hover lift.                */
@@ -1296,14 +1292,14 @@
           <div class="sub-widget mt-8">
             <button class="info-btn" type="button" data-info="type-cold-ad"><span aria-hidden="true">i</span></button>
             <h4 class="sub-heading">Ad Creatives</h4>
-            <div class="deliverables-slider mt-6">
+            <div class="deliverables-slider has-parts mt-6">
 
               <!-- Static -->
-              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+              <div class="part-col" style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
                 <button class="info-btn" type="button" data-info="type-cold-ad-static"><span aria-hidden="true">i</span></button>
                 <p class="sample-label" style="font-size: 1.02rem;">Static</p>
-
-                <article class="block-card mt-6">
+                <div class="part-vscroll mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-ad-square"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Square</p>
                   <div class="mt-6">
@@ -1317,7 +1313,7 @@
                   </div>
                 </article>
 
-                <article class="block-card mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-ad-rectangle"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Rectangle</p>
                   <div class="mt-6">
@@ -1331,7 +1327,7 @@
                   </div>
                 </article>
 
-                <article class="block-card mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-ad-carousel"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Carousel</p>
                   <div class="mt-6">
@@ -1345,6 +1341,8 @@
                     </a>
                   </div>
                 </article>
+                </div>
+                <p class="slider-hint mt-4">Scroll for more &darr;</p>
               </div>
 
               <!-- Video -->
@@ -1450,14 +1448,14 @@
           <div class="sub-widget mt-6">
             <button class="info-btn" type="button" data-info="type-cold-seq"><span aria-hidden="true">i</span></button>
             <h4 class="sub-heading">Sequences</h4>
-            <div class="deliverables-slider mt-6">
+            <div class="deliverables-slider has-parts mt-6">
 
               <!-- Pre-Webinar -->
-              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+              <div class="part-col" style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
                 <button class="info-btn" type="button" data-info="type-cold-seq-prewebinar"><span aria-hidden="true">i</span></button>
                 <p class="sample-label" style="font-size: 1.02rem;">Pre-Webinar</p>
-
-                <article class="block-card mt-6">
+                <div class="part-vscroll mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-prewebinar-email"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Email</p>
                   <div class="mt-6">
@@ -1471,7 +1469,7 @@
                   </div>
                 </article>
 
-                <article class="block-card mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-prewebinar-whatsapp"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">WhatsApp Group</p>
                   <div class="mt-6">
@@ -1484,14 +1482,16 @@
                     </a>
                   </div>
                 </article>
+                </div>
+                <p class="slider-hint mt-4">Scroll for more &darr;</p>
               </div>
 
               <!-- Post-Webinar -->
-              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+              <div class="part-col" style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
                 <button class="info-btn" type="button" data-info="type-cold-seq-postwebinar"><span aria-hidden="true">i</span></button>
                 <p class="sample-label" style="font-size: 1.02rem;">Post-Webinar</p>
-
-                <article class="block-card mt-6">
+                <div class="part-vscroll mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-postwebinar-email"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Email</p>
                   <div class="mt-6">
@@ -1505,7 +1505,7 @@
                   </div>
                 </article>
 
-                <article class="block-card mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-postwebinar-whatsapp"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">WhatsApp Group</p>
                   <div class="mt-6">
@@ -1518,14 +1518,16 @@
                     </a>
                   </div>
                 </article>
+                </div>
+                <p class="slider-hint mt-4">Scroll for more &darr;</p>
               </div>
 
               <!-- Pre-Call -->
-              <div style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
+              <div class="part-col" style="position: relative; flex: 0 0 auto; width: 250px; scroll-snap-align: center;">
                 <button class="info-btn" type="button" data-info="type-cold-seq-precall"><span aria-hidden="true">i</span></button>
                 <p class="sample-label" style="font-size: 1.02rem;">Pre-Call</p>
-
-                <article class="block-card mt-6">
+                <div class="part-vscroll mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-precall-email"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">Email</p>
                   <div class="mt-6">
@@ -1539,7 +1541,7 @@
                   </div>
                 </article>
 
-                <article class="block-card mt-6">
+                <article class="block-card">
                   <button class="info-btn" type="button" data-info="inst-cold-seq-precall-whatsapp"><span aria-hidden="true">i</span></button>
                   <p class="sample-label">WhatsApp Group</p>
                   <div class="mt-6">
@@ -1552,6 +1554,8 @@
                     </a>
                   </div>
                 </article>
+                </div>
+                <p class="slider-hint mt-4">Scroll for more &darr;</p>
               </div>
 
             </div>
@@ -1603,10 +1607,13 @@
             <div class="miro-frame">
               <!-- Live Miro board embed URL (from Miro Share > Embed). -->
               <iframe
-                src="https://miro.com/app/live-embed/uXjVHTCSuB4=/?embedMode=view_only_without_ui&embedId=352656375421"
+                width="768"
+                height="432"
+                src="https://miro.com/app/live-embed/uXjVHTCSuB4=/?embedMode=view_only_without_ui&moveToViewport=-60877,-75597,28176,13985&embedId=529974374057"
                 title="Client results board"
                 frameborder="0"
                 scrolling="no"
+                loading="lazy"
                 allowfullscreen
                 allow="fullscreen; clipboard-read; clipboard-write">
               </iframe>
@@ -1944,6 +1951,7 @@
           if (i >= list.length) return fail(win);
           var img = new Image();
           img.decoding = "async";
+          img.loading = "lazy";
           img.className = "dp-media";
           img.onload = function () {
             if (!img.naturalWidth || !img.naturalHeight) { i++; return attempt(); }
@@ -2036,6 +2044,42 @@
         });
       }, { rootMargin: "200px 0px" });
       items.forEach(function (it) { it.win.__dp = it; io.observe(it.win); });
+    })();
+
+    // ===========================================================
+    // PART COLUMNS — ONE-CARD-TALL VERTICAL SCROLLERS
+    // Each part (Ad Creatives Static, the Sequences parts) shows its instances
+    // in a window capped to one instance card tall; the rest are reached by
+    // vertical scroll-snap. Height is taken from the first card's offsetHeight
+    // (ignores the page transform:scale) and re-synced when its lazy preview
+    // loads (ResizeObserver) and on resize (debounced). So a type never grows
+    // taller just because a part has several instances.
+    // ===========================================================
+    (function () {
+      var scrollers = document.querySelectorAll(".part-vscroll");
+      if (!scrollers.length) return;
+      function sizeOne(sc) {
+        var first = sc.querySelector(".block-card");
+        if (first) sc.style.height = first.offsetHeight + "px";
+      }
+      var ro = ("ResizeObserver" in window)
+        ? new ResizeObserver(function (entries) {
+            entries.forEach(function (e) {
+              var sc = e.target.parentNode;
+              if (sc && sc.classList && sc.classList.contains("part-vscroll")) sizeOne(sc);
+            });
+          })
+        : null;
+      scrollers.forEach(function (sc) {
+        sizeOne(sc);
+        var first = sc.querySelector(".block-card");
+        if (first && ro) ro.observe(first);
+      });
+      var t;
+      window.addEventListener("resize", function () {
+        clearTimeout(t);
+        t = setTimeout(function () { scrollers.forEach(sizeOne); }, 150);
+      }, { passive: true });
     })();
 
     // ===========================================================
