@@ -722,81 +722,61 @@
       flex: 0 0 auto;
     }
 
-    /* ============ INSTANCE-CARD ASSET PREVIEW (decorative) ============ */
-    /* An obscured preview of each LIVE deliverable, injected by JS between a   */
-    /* card's label and its CTA. Purely decorative (pointer-events:none +       */
-    /* aria-hidden) so the CTA stays the only way into the lightbox. The MEDIA  */
-    /* is blurred (never the frame); a flat tint + radial vignette obscure it.  */
-    /* Visual types render the real asset; pdf types are DRAWN (no PDF.js).     */
-    :root {
-      --dp-blur: 5px;
-      --dp-tint: rgba(0, 0, 0, 0.35);
-    }
-    .dp-window {
-      position: relative;
+    /* ============ DELIVERABLE PREVIEW ============ */
+    /* Injected between the sample label and the CTA; aria-hidden +              */
+    /* pointer-events:none, so the CTA stays the only way to open the lightbox.  */
+    /* Two treatments, both in a rounded-corner card:                           */
+    /*   • Image instances (.jpg/.png: image, carousel, landing page) get the    */
+    /*     obscured look — blur + dark tint/vignette + framed card (.dp-obscure). */
+    /*   • PDF instances (the pre-styled Flat/Stack/Deck images) OMIT .dp-obscure */
+    /*     so they get NO blur/vignette — just the same rounded-corner card.      */
+    /* Landing pages crop to a 4:3 vertical card (top of the page, cover);        */
+    /* everything else uses its natural aspect ratio (set from the image in JS).  */
+    .dp-preview {
       width: 100%;
-      margin-top: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--hairline);
-      background-color: var(--card);
-      overflow: hidden;
-      box-shadow: inset 0 2px 16px rgba(0, 0, 0, 0.55);
+      margin-top: 1.5rem;
+      position: relative;
       pointer-events: none;
     }
-    .dp-stack { position: absolute; inset: 0; }
-    .dp-face {
-      position: absolute;
+    .dp-win {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;   /* placeholder until the natural ratio is set (JS) */
+      border-radius: 12px;   /* rounded corners on every preview card */
       overflow: hidden;
-      border-radius: 6px;
-      background-color: #2b2b2b;
-    }
-    .dp-face--doc { background-color: #f4f4f2; }
-    .dp-layer { filter: blur(3px); }
-    .dp-layer--img { background-color: #3a3a3a; }
-    .dp-layer--doc {
-      background-color: #f4f4f2;
-      border: 1px solid rgba(0, 0, 0, 0.06);
     }
     .dp-media {
       position: absolute;
-      display: block;
-      filter: blur(var(--dp-blur));
-    }
-    .dp-media--cover {
       inset: 0;
+      z-index: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.05);
-      transform-origin: center;
-    }
-    .dp-media--top {
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: auto;
-      transform: scale(1.05);
-      transform-origin: top center;
-    }
-    .dp-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
       display: block;
-      filter: blur(var(--dp-blur));
     }
-    .dp-tint {
+    /* Landing pages (tall screenshots): 4:3 vertical card, top-cropped. */
+    .dp-win.dp-scroll { aspect-ratio: 3 / 4; }
+    .dp-win.dp-scroll .dp-media { object-position: top center; transform-origin: top center; }
+    /* Image-instance previews: the original obscured treatment (frame + blur +  */
+    /* vignette). PDF previews omit .dp-obscure, so they get none of this.        */
+    .dp-win.dp-obscure {
+      border: 1px solid var(--hairline);
+      background: var(--card);
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
+    }
+    .dp-win.dp-obscure .dp-media {
+      filter: blur(var(--dp-blur, 5px));
+      transform: scale(1.05);  /* hide the blur's transparent halo at the edges */
+    }
+    .dp-win.dp-obscure::after {
+      content: "";
       position: absolute;
       inset: 0;
-      background: var(--dp-tint);
+      z-index: 2;
       pointer-events: none;
-    }
-    .dp-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.55) 100%);
-      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.55) 100%),
+        rgba(0, 0, 0, var(--dp-tint, 0.35));
     }
 
     /* ============ DELIVERABLES SLIDER ============ */
@@ -1939,195 +1919,142 @@
     })();
 
     // ===========================================================
-    // INSTANCE-CARD ASSET PREVIEW  (decorative, obscured)
-    // For every LIVE (unbracketed) a[data-lb], inject a blurred + tinted +
-    // vignetted preview window between the card's label and its CTA, so the hub
-    // shows finished-looking work instead of bare buttons. Visual types render
-    // the REAL asset (image / carousel first slide / scroll-image top); pdf
-    // types are DRAWN as makeshift document faces (no PDF.js, no fetch — so they
-    // can't blank on file:// and don't spin up a worker). Purely decorative:
-    // pointer-events none + aria-hidden, so the CTA stays the ONLY way into the
-    // lightbox. Rendered lazily as each nears the viewport.
+    // DELIVERABLE PREVIEWS (raw supplied images — no post-processing)
+    // For every LIVE sample-deliverable card (its data-lb href — or, for a
+    // carousel, its first data-lb-srcs entry — does NOT start with "["), inject
+    // the card's supplied preview image between the sample label and the CTA,
+    // chosen by ONE simple rule:
+    //   • If the asset is a .jpg / .png, use that image.
+    //   • If the asset is a PDF, DON'T touch the PDF — use a sibling image from
+    //     the asset's own folder: "Flat" (Reel, Direct-to-camera), "Deck"
+    //     (Slideshow), or "Stack" (every other PDF), as .png or .jpg.
+    // Image instances (.jpg/.png: image, carousel, landing page) get the site's
+    // obscured look — blur + dark tint/vignette + framed rounded card. PDF
+    // instances (the pre-styled Flat/Stack/Deck images) get NO blur/vignette,
+    // just the same rounded-corner card. Landing-page screenshots crop to a 4:3
+    // vertical card (top of the page, cover); everything else keeps its natural
+    // aspect ratio.
+    // Coming-soon / bracketed cards get nothing. Rendering is lazy
+    // (IntersectionObserver, ~200px). Every window is aria-hidden +
+    // pointer-events:none, so the CTA remains the ONLY way to open the lightbox
+    // (which still opens the real assets, incl. real PDFs, and is untouched).
     // ===========================================================
     (function () {
-      var BLUR_PX = 5;              // media blur strength
-      var TINT_ALPHA = 0.35;        // flat dark tint over the media
-      var CAROUSEL_STACK_MAX = 3;   // most slides suggested behind a carousel
-      var DOC_STACK = 3;            // back layers behind a document pile
-      var DECK_STACK = 4;           // back layers behind a slide deck
-      var STEP = 6;                 // px diagonal offset per stacked layer
-
+      var BLUR_PX = 5;        // blur strength on image-instance previews, px
+      var TINT_ALPHA = 0.35;  // dark tint alpha on image-instance previews
       var root = document.documentElement;
       root.style.setProperty("--dp-blur", BLUR_PX + "px");
-      root.style.setProperty("--dp-tint", "rgba(0,0,0," + TINT_ALPHA + ")");
+      root.style.setProperty("--dp-tint", String(TINT_ALPHA));
 
-      function bracketed(v) { return !v || v.charAt(0) === "["; }
-      function firstSrc(a) {
-        var s = a.getAttribute("data-lb-srcs");
-        return s ? s.split("|")[0] : a.getAttribute("href");
+      function fail(win) {
+        var pre = win.closest(".dp-preview");
+        if (pre) pre.style.display = "none"; // hide THIS window gracefully
       }
 
-      // Tag a live pdf card by its title / part path; default doc-single.
-      function classifyPdf(a) {
-        var explicit = a.getAttribute("data-preview");
-        if (explicit) return explicit;
+      // Place a supplied image into the window. `list` is one or more candidate
+      // srcs tried in order (PDF previews try the folder's Flat/Stack/Deck image
+      // as .png then .jpg). When setRatio is true the window takes the image's
+      // natural aspect ratio; landing pages pass false to keep their fixed 3:4.
+      // Any blur / vignette / frame is applied purely in CSS (the window's
+      // .dp-obscure class). If all srcs fail, the window hides gracefully.
+      function renderImage(win, list, setRatio) {
+        var i = 0;
+        (function attempt() {
+          if (i >= list.length) return fail(win);
+          var img = new Image();
+          img.decoding = "async";
+          img.className = "dp-media";
+          img.onload = function () {
+            if (!img.naturalWidth || !img.naturalHeight) { i++; return attempt(); }
+            if (setRatio) win.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
+            win.appendChild(img);
+          };
+          img.onerror = function () { i++; attempt(); };
+          img.src = list[i];
+        })();
+      }
+
+      // For a PDF card, pick the sibling preview image in the asset's OWN folder:
+      // "Flat" (Reel, Direct-to-camera), "Deck" (Slideshow), or "Stack" (every
+      // other PDF). Returns the name + .png / .jpg candidate srcs (tried in order).
+      function pdfPreview(a) {
         var t = (a.getAttribute("data-lb-title") || "").toLowerCase();
-        if (t.indexOf("slideshow") !== -1) return "deck-stack";
-        if (/sequence|messages|video sales letter/.test(t)) return "doc-stack";
-        return "doc-single";
-      }
-
-      function el(cls) { var d = document.createElement("div"); if (cls) d.className = cls; return d; }
-
-      function makeWindow(aspect) {
-        var w = el("dp-window");
-        w.setAttribute("aria-hidden", "true");
-        if (aspect) w.style.aspectRatio = aspect;
-        return w;
-      }
-      function addOverlays(w) {
-        w.appendChild(el("dp-tint"));
-        w.appendChild(el("dp-vignette"));
-      }
-
-      // Position a face at stacking depth (0 = front, top-left; deeper = down-right).
-      function placeFace(node, depth, maxOff) {
-        var o = depth * STEP;
-        node.style.top = o + "px";
-        node.style.left = o + "px";
-        node.style.right = (maxOff - o) + "px";
-        node.style.bottom = (maxOff - o) + "px";
-      }
-
-      // Build a pile: backCount faint layers behind the front face node.
-      function buildStack(w, front, backCount, layerClass) {
-        var stack = el("dp-stack");
-        var maxOff = backCount * STEP;
-        for (var depth = backCount; depth >= 1; depth--) {
-          var layer = el("dp-face dp-layer " + layerClass);
-          placeFace(layer, depth, maxOff);
-          layer.style.opacity = String(Math.max(0.25, 1 - depth * 0.22));
-          stack.appendChild(layer);
+        var h = a.getAttribute("href") || "";
+        var hl = h.toLowerCase();
+        var name;
+        if (hl.indexOf("/webinar/slideshow") >= 0 || t.indexOf("slideshow") >= 0) {
+          name = "Deck";
+        } else if (hl.indexOf("/pieces/reel") >= 0 || t.indexOf("reel") >= 0 ||
+                   hl.indexOf("direct-to-camera") >= 0 || t.indexOf("direct-to-camera") >= 0) {
+          name = "Flat";
+        } else {
+          name = "Stack";
         }
-        placeFace(front, 0, maxOff);
-        stack.appendChild(front);
-        w.appendChild(stack);
-      }
-      function buildSingle(w, front) {
-        var stack = el("dp-stack");
-        placeFace(front, 0, 0);
-        stack.appendChild(front);
-        w.appendChild(stack);
+        var folder = h.substring(0, h.lastIndexOf("/") + 1); // keeps %20 / %26 encoding
+        return { name: name, srcs: [folder + name + ".png", folder + name + ".jpg"] };
       }
 
-      // ---- Drawn document face (shared by doc-single, doc-stack, deck-stack) --
-      // A near-white page: heading bar, ~6 text lines, paragraph gap, second
-      // heading bar, more lines. Portrait for docs; the SAME face, wider, for a
-      // deck (no title slide / accent shapes — just the document look).
-      function docSVG(landscape) {
-        var W = landscape ? 1600 : 850;
-        var H = landscape ? 900 : 1100;
-        var m = Math.round(W * 0.1);
-        var cw = W - m * 2;
-        var lh = Math.round(H * 0.03);
-        var gap = Math.round(lh * 0.85);
-        var y = Math.round(H * 0.1);
-        var out = ['<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="' + Math.round(W * 0.02) + '" fill="#f4f4f2"/>'];
-        function bar(wpct, h, fill) {
-          out.push('<rect x="' + m + '" y="' + y + '" width="' + Math.round(cw * wpct) + '" height="' + h + '" rx="' + Math.round(h * 0.4) + '" fill="' + fill + '"/>');
-          y += h + gap;
+      // Build + insert a preview for one live card; returns { win, render } or
+      // null for coming-soon / bracketed cards.
+      function build(anchor) {
+        var type = anchor.getAttribute("data-lb-type") || "image";
+        var srcs = null, src;
+        if (type === "carousel") {
+          srcs = (anchor.getAttribute("data-lb-srcs") || "").split("|").filter(Boolean);
+          src = srcs[0];
+        } else {
+          src = anchor.getAttribute("href");
         }
-        function line(wpct) { bar(wpct, lh, "#d7d7d7"); }
-        bar(0.45, Math.round(lh * 1.5), "#c4c4c4");   // heading bar 1
-        y += gap;
-        [1, 0.94, 0.97, 0.72, 0.9, 0.86].forEach(line);
-        y += Math.round(gap * 1.6);                    // paragraph gap
-        bar(0.4, Math.round(lh * 1.5), "#c4c4c4");     // heading bar 2
-        y += gap;
-        [0.98, 0.9, 0.95, 0.68].forEach(line);
-        return '<svg class="dp-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + out.join("") + "</svg>";
-      }
-      function docFace(landscape) {
-        var f = el("dp-face dp-face--doc");
-        f.innerHTML = docSVG(landscape);
-        return f;
-      }
+        if (!src || src.charAt(0) === "[") return null; // bracketed / coming-soon
 
-      // ---- Real-image face (image / carousel front slide / scroll-image) -----
-      function imgFace(src, mediaClass, onload, onerror) {
-        var f = el("dp-face dp-face--img");
-        var img = document.createElement("img");
-        img.className = "dp-media " + mediaClass;
-        img.alt = "";
-        img.decoding = "async";
-        img.addEventListener("load", function () { onload(img); });
-        img.addEventListener("error", onerror);
-        img.src = src;
-        f.appendChild(img);
-        return f;
-      }
+        var wrapDiv = anchor.parentNode;            // the <div class="mt-6"> holding the CTA
+        if (!wrapDiv || !wrapDiv.parentNode) return null;
 
-      function renderVisual(a, w, type) {
-        var hide = function () { w.style.display = "none"; };
-        function setRatio(img) {
-          if (img.naturalWidth && img.naturalHeight) {
-            w.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
-          }
+        var pre = document.createElement("div");
+        pre.className = "dp-preview";
+        pre.setAttribute("aria-hidden", "true");
+        var win = document.createElement("div");
+        win.className = "dp-win";
+
+        var imgList, isScroll = (type === "scroll-image");
+        if (type === "pdf") {
+          var pv = pdfPreview(anchor);           // Flat / Stack / Deck sibling image (pre-styled)
+          imgList = pv.srcs;
+          var card = anchor.closest(".block-card");
+          if (card) card.setAttribute("data-preview", pv.name); // tag the live pdf card
+        } else {
+          imgList = [src];                       // image / carousel first slide / scroll-image
+          win.classList.add("dp-obscure");       // image instances: blur + vignette + frame
+          if (isScroll) win.classList.add("dp-scroll"); // landing pages: 4:3 top-crop
         }
-        if (type === "scroll-image") {
-          buildSingle(w, imgFace(a.getAttribute("href"), "dp-media--top", function () {}, hide));
-        } else if (type === "carousel") {
-          var srcs = (a.getAttribute("data-lb-srcs") || "").split("|").filter(Boolean);
-          var back = Math.min(srcs.length, CAROUSEL_STACK_MAX) - 1;
-          var face = imgFace(srcs[0], "dp-media--cover", setRatio, hide);
-          if (back > 0) buildStack(w, face, back, "dp-layer--img");
-          else buildSingle(w, face);
-        } else { // image
-          buildSingle(w, imgFace(a.getAttribute("href"), "dp-media--cover", setRatio, hide));
-        }
-        addOverlays(w);
+        pre.appendChild(win);
+        wrapDiv.parentNode.insertBefore(pre, wrapDiv); // between sample-label and CTA
+
+        // Natural ratio for everything except landing pages (fixed 3:4).
+        function render() { renderImage(win, imgList, !isScroll); }
+        return { win: win, render: render };
       }
 
-      function renderPdf(a, w) {
-        var kind = classifyPdf(a);
-        var front = docFace(kind === "deck-stack");
-        if (kind === "doc-stack") buildStack(w, front, DOC_STACK, "dp-layer--doc");
-        else if (kind === "deck-stack") buildStack(w, front, DECK_STACK, "dp-layer--doc");
-        else buildSingle(w, front);
-        addOverlays(w);
-      }
-
-      // ---- Lazy scheduling ---------------------------------------------------
-      var io = ("IntersectionObserver" in window)
-        ? new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-              if (e.isIntersecting) { io.unobserve(e.target); if (e.target.__render) e.target.__render(); }
-            });
-          }, { rootMargin: "200px 0px" })
-        : null;
-      function schedule(w, fn) { if (io) { w.__render = fn; io.observe(w); } else { fn(); } }
-
-      // ---- Wire every live instance card ------------------------------------
+      var items = [];
       document.querySelectorAll("a[data-lb]").forEach(function (a) {
-        var type = a.getAttribute("data-lb-type") || "image";
-        var live = (type === "carousel") ? !bracketed(firstSrc(a)) : !bracketed(a.getAttribute("href"));
-        if (!live) return;
-        var slot = a.parentElement;            // the <div class="mt-6"> around the CTA
-        if (!slot || !slot.parentNode) return;
-        var prev = slot.previousElementSibling;
-        if (prev && prev.classList && prev.classList.contains("dp-window")) return;
-
-        var isPdf = type === "pdf";
-        var provisional = isPdf
-          ? (classifyPdf(a) === "deck-stack" ? "16 / 9" : "85 / 110")
-          : (type === "scroll-image" ? "5 / 6" : "1 / 1");
-        var w = makeWindow(provisional);
-        slot.parentNode.insertBefore(w, slot);
-        schedule(w, function () {
-          if (isPdf) renderPdf(a, w);
-          else renderVisual(a, w, type);
-        });
+        var it = build(a);
+        if (it) items.push(it);
       });
+      if (!items.length) return;
+
+      // Lazy: render each preview only when it scrolls near the viewport.
+      if (!("IntersectionObserver" in window)) {
+        items.forEach(function (it) { it.render(); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          io.unobserve(entry.target);
+          if (entry.target.__dp) entry.target.__dp.render();
+        });
+      }, { rootMargin: "200px 0px" });
+      items.forEach(function (it) { it.win.__dp = it; io.observe(it.win); });
     })();
 
     // ===========================================================
